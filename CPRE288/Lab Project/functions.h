@@ -73,5 +73,8 @@ int auto_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj);
 
 void turning_init(oi_t *sensor_data);
 
+void sound ();
+
+void cliff_detection (oi_t *sensor_data);
 
 #endif /* FUNCTIONS_H_ */
