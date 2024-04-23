@@ -447,5 +447,56 @@ void sound()
 
 
 
+void sound () {
+    //oi_loadSong(int song_index, int num_notes, unsigned char *notes, unsigned char *duration);
+    //oi_play_song(int index);
+    //unsigned char notes[] = {60,62};
+    //unsigned char duration[] = {16,16};
+   
+    unsigned char notes[] = {88,88,88,88,88,88,88,76,87,87,87,75,97,97,97,73,93,93,92,88};
+    unsigned char duration[] = {8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8,8};
+   
+    //oi_loadSong(0, 2, notes, duration);
+    oi_loadSong(0, 20, notes, duration);
+    oi_play_song(0);
 
+    //return 0;
+
+}
+
+
+void cliff_detection (oi_t *sensor_data) {
+    int cliff_left = 0;
+    int cliff_front_left = 0;
+    int cliff_front_right = 0;
+    int cliff_right = 0;
+
+    while (1) {
+        oi_update(sensor_data);
+        cliff_left = sensor_data -> cliffLeft;
+        cliff_front_left = sensor_data -> cliffFrontLeft;
+        cliff_front_right = sensor_data -> cliffFrontRight;
+        cliff_right = sensor_data -> cliffRight;
+
+        if (cliff_left == 1) {
+            lcd_printf ("cliffLeft");
+        }
+
+        else if (cliff_front_left == 1) {
+            lcd_printf ("cliffFrontLeft");
+        }
+
+        else if (cliff_front_right == 1) {
+            lcd_printf ("cliffFrontRight");
+        }
+
+        else if (cliff_right == 1) {
+            lcd_printf ("cliffRight");
+        }
+        else {
+            lcd_printf ("Nada");
+        }
+    }
+    //return;
+}
 
