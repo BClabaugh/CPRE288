@@ -77,6 +77,8 @@ void full_scan_data_free(full_scan_data_t *self)
 void scan_path(full_scan_data_t *full_scan_data){
   uart_sendChar('\r');
   uart_sendChar('\n');
+  servos_move(0);
+  timer_waitMillis(700);
   int i;
   for (i=0; i <= 180; i+=2)
   {
@@ -113,7 +115,7 @@ void scan_objs(full_scan_data_t *full_scan_data){
   find_objects_full(full_scan_data);
   uart_sendChar('\r');
   uart_sendChar('\n');
-  //full_scan_data_send(full_scan_data);
+  full_scan_data_send(full_scan_data);
   object_data_send(full_scan_data);
 
 }
@@ -196,7 +198,8 @@ void find_objects_full(full_scan_data_t *full_scan_data){
       full_scan_data -> obj_dist[k] = full_scan_data -> sound_dist_arr[middle_angle_array];
       full_scan_data -> obj_IR_dist[k] = full_scan_data -> IR_val_arr[middle_angle_array];
       full_scan_data -> obj_radial_len[k] = (2 * angle_difference);
-      full_scan_data -> obj_width[k] = ( (2*angle_difference) / 360.0 )*( full_scan_data -> IR_val_arr[middle_angle_array] )*2*3.1415926;
+      //full_scan_data -> obj_width[k] = ( (2*angle_difference) / 360.0 )*( full_scan_data -> IR_val_arr[middle_angle_array] )*2*3.1415926;
+      full_scan_data -> obj_width[k] = ( (2*angle_difference) / 360.0 )*( full_scan_data -> sound_dist_arr[middle_angle_array] )*2*3.1415926;
 
     }
   }
@@ -229,11 +232,11 @@ void reset_objects(full_scan_data_t *self){
 void scan_send(full_scan_data_t *full_scan_data, int deg){
   sendBytesInt("Degrees: ", deg);
   uart_sendChar('\t');
-  sendBytes("Distance: ", full_scan_data -> sound_dist_arr[deg]);
+  sendBytes("Distance: ", full_scan_data -> sound_dist_arr[deg/2]);
   uart_sendChar('\t');
-  sendBytes("IR raw: ", full_scan_data -> IR_raw_val_arr[deg]);
+  sendBytes("IR raw: ", full_scan_data -> IR_raw_val_arr[deg/2]);
   uart_sendChar('\t');
-  sendBytes("IR: ", full_scan_data -> IR_val_arr[deg]);
+  sendBytes("IR: ", full_scan_data -> IR_val_arr[deg/2]);
   uart_sendChar('\r');
   uart_sendChar('\n');
 }
@@ -286,16 +289,20 @@ void object_data_send(full_scan_data_t *self){
 
 // finds the smallest object of detected objects
 int smallest_object(full_scan_data_t *self){
-  int sml_obj = 0;
+  int sml_obj = -1;
   int i;
-  for (i=1; i <= 7; i+=1)
+  if(self -> obj_num[0] != 0)
   {
-    if(self -> obj_num[i] != 0){
-      if(self -> obj_width[i] < self -> obj_width[sml_obj]){
+      sml_obj = 0;
+      for (i=1; i <= 7; i+=1)
+        {
+          if(self -> obj_num[i] != 0){
+            if(self -> obj_width[i] < self -> obj_width[sml_obj]){
 
-        sml_obj = i;
-      }
-    }
+              sml_obj = i;
+            }
+          }
+        }
   }
   // pointing CyBot sensor at smallest object
   servos_move(self -> obj_mid_angle[sml_obj]);
@@ -303,53 +310,103 @@ int smallest_object(full_scan_data_t *self){
   return sml_obj;
 }
 
-void controlled_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj){
-  char ch = 'o';
-  while(ch != 'q'){
-    //ch = uart_receive();
-    if(ch == 'w'){
-      move_forward_spd(sensor_data, 50, 75);
+// finds the closest object of detected objects
+int closest_object(full_scan_data_t *self){
+  int clos_obj = 0;
+  int i;
+  for (i=0; i <= 7; i+=1)
+  {
+    if(self -> obj_num[i] != 0){
+      if(self -> obj_dist[i] < self -> obj_dist[clos_obj]){
+
+          clos_obj = i;
+      }
     }
-    if(ch == 'x'){
-      move_backward_spd(sensor_data, 50, -75);
-    }
-    if(ch == 'a'){
-      turn_left(sensor_data, 30);
-    }
-    if(ch == 'd'){
-      turn_right(sensor_data, 30);
-    }
-    if(ch == 'm'){
-      scan_path(self);
-    }
-    if(command_flag_toggle == 1){
-        command_flag_toggle = 0;
-        auto_driving(self, sensor_data, sml_obj);
-    }
-    ch = uart_receive();
-  }  
+  }
+  // pointing CyBot sensor at smallest object
+  servos_move(self -> obj_mid_angle[clos_obj]);
+  //cyBOT_Scan(self -> obj_mid_angle[sml_obj], scan_data);
+  return clos_obj;
 }
 
-int auto_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj){
-    int mid_ang = self -> obj_mid_angle[sml_obj];
-    if(mid_ang > 92){
-        turn_left(sensor_data, mid_ang - 90);
+// finds the amount of pillars from scan
+int sml_objs_count(full_scan_data_t *self){
+  int sml_objs = 0;
+  int i;
+  for (i=0; i <= 7; i+=1)
+  {
+    if(self -> obj_num[i] != 0){
+      if(self -> obj_width[i] < 6){
+          sml_objs += 1;
+      }
     }
-    else if(mid_ang < 88){
-        turn_right(sensor_data, 90 - mid_ang);
-    }
-    if(command_flag_toggle == 1){
-        command_flag_toggle = 0;
-        return 0;
-    }
-    int tog = 0;
-    tog = auto_forward(sensor_data, (10*((self -> obj_dist[sml_obj]) - 10)), 75);
-    if(tog == 1){
-        return 0;
-    }
-    return 0;
-
+  }
+  return sml_objs;
 }
+
+// finds the pillars' object numbers from scan in array
+void sml_objs_nums_arr(full_scan_data_t *self, int sml_objs, int arr[]){
+  //int sml_objs_nums[sml_objs];
+  int i;
+  int j = 0;
+  for (i=0; i <= 7; i+=1)
+  {
+    if(self -> obj_num[i] != 0){
+      if(self -> obj_width[i] < 6){
+          arr[j] = self -> obj_num[i];
+          j += 1;
+      }
+    }
+  }
+}
+
+//void controlled_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj){
+//  char ch = 'o';
+//  while(ch != 'q'){
+//    //ch = uart_receive();
+//    if(ch == 'w'){
+//      move_forward_spd(sensor_data, 50, 75);
+//    }
+//    if(ch == 'x'){
+//      move_backward_spd(sensor_data, 50, -75);
+//    }
+//    if(ch == 'a'){
+//      turn_left(sensor_data, 30);
+//    }
+//    if(ch == 'd'){
+//      turn_right(sensor_data, 30);
+//    }
+//    if(ch == 'm'){
+//      scan_path(self);
+//    }
+//    if(command_flag_toggle == 1){
+//        command_flag_toggle = 0;
+//        auto_driving(self, sensor_data, sml_obj);
+//    }
+//    ch = uart_receive();
+//  }
+//}
+
+//int auto_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj){
+//    int mid_ang = self -> obj_mid_angle[sml_obj];
+//    if(mid_ang > 92){
+//        turn_left(sensor_data, mid_ang - 90);
+//    }
+//    else if(mid_ang < 88){
+//        turn_right(sensor_data, 90 - mid_ang);
+//    }
+//    if(command_flag_toggle == 1){
+//        command_flag_toggle = 0;
+//        return 0;
+//    }
+//    int tog = 0;
+//    tog = auto_forward(sensor_data, (10*((self -> obj_dist[sml_obj]) - 10)), 75);
+//    if(tog == 1){
+//        return 0;
+//    }
+//    return 0;
+//
+//}
 
 void turning_init(oi_t *sensor_data){
     turn_left(sensor_data, 90);
@@ -379,6 +436,14 @@ void turning_init(oi_t *sensor_data){
 //         distance += 1;
 //     }
 // }
+
+void sound()
+{
+    unsigned char notes[] = {88, 88, 88, 88, 88, 88, 88, 76, 87, 87, 87, 75, 97, 97, 97, 73, 93, 93, 92, 88};
+    unsigned char duration[] = {16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16};
+    oi_loadSong(0, 20, notes, duration);
+    oi_play_song(0);
+}
 
 
 

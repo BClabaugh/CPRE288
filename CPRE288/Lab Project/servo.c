@@ -69,15 +69,21 @@ uint32_t servos_move(uint16_t degrees){
     // 90 degrees (1.5 ms high) match_val = 296000 = 0x048440
     // 180 degrees (2 ms high) match_val = 288000 = 0x046500
 
+
+
+
     uint32_t pre_pos = TIMER1_TBPMR_R;
     pre_pos = pre_pos << 16;
     pre_pos |= TIMER1_TBMATCHR_R;
+    //int deg_diff = ((pre_pos - (304000 + 8500)) / (-88-60));
     int deg_diff = ((pre_pos - (304000 + 8500)) / (-88-60));
 
+    //uint32_t match_val = ((-88-60) * degrees) + (304000 + 8500);
     uint32_t match_val = ((-88-60) * degrees) + (304000 + 8500);
 
     deg_diff = abs(match_val - deg_diff);
-    int wait_time = 0.4;
+    deg_diff = abs(degrees - deg_diff);
+    int wait_time = 0.5;//0.4
     if (deg_diff > 60 && deg_diff <= 120){
         wait_time *=2;
     }

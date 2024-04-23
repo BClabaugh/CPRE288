@@ -1,6 +1,6 @@
 /**
  * @file main.c
- * @author people
+ * @author Corey & Friends
  */
 
 #include "Timer.h"
@@ -12,6 +12,9 @@
 #include "movement.h"
 #include "functions.h"
 #include "uart-interrupt.h"
+#include "final.h"
+#include "math.h"
+
 
 
 
@@ -27,13 +30,22 @@ int main(void) {
 	ping_init();
 	servos_init();
 
+
   
   //---------------- Lab Project -----------------
-  scan_path(full_scan_data);
-  scan_objs(full_scan_data);
-  int sml_obj = 0;
-  sml_obj = smallest_object(full_scan_data);
-  controlled_driving(full_scan_data, sensor_data, sml_obj);
+
+
+//	while(1)
+//	{
+//	    oi_update(sensor_data);
+//	    lcd_printf("%s%d\n%s%d\n%s%d\n%s%d", "L:", sensor_data->cliffLeftSignal, "LF:", sensor_data->cliffFrontLeftSignal, "RF:", sensor_data->cliffFrontRightSignal, "R:", sensor_data->cliffRightSignal);
+//	}
+
+
+
+	//sound();
+  controlled_driving(full_scan_data, sensor_data);
+
 
 
 

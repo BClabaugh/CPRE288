@@ -17,6 +17,7 @@
 
 // These variables are declared as examples for your use in the interrupt handler.
 
+volatile char command_byte = 'o';
 volatile char command_byte_toggle = 't'; // byte value for special character used as a command
 volatile int command_flag_toggle = 0; // flag to tell the main program a special command was received
 
@@ -147,17 +148,25 @@ void UART1_Handler(void)
             //send a newline character back to PuTTY
             uart_sendChar('\n');
         }
+//        else
+//        {
+//            //AS NEEDED
+//            //code to handle any other special characters
+//            //code to update global shared variables
+//            //DO NOT PUT TIME-CONSUMING CODE IN AN ISR
+//
+//            if (byte_received == command_byte_toggle)
+//            {
+//              command_flag_toggle = 1;
+//            }
+//        }
+        else if(byte_received == command_byte_toggle)
+        {
+            command_flag_toggle = 1;
+        }
         else
         {
-            //AS NEEDED
-            //code to handle any other special characters
-            //code to update global shared variables
-            //DO NOT PUT TIME-CONSUMING CODE IN AN ISR
-
-            if (byte_received == command_byte_toggle)
-            {
-              command_flag_toggle = 1;
-            }
+            command_byte = byte_received;
         }
     }
 }

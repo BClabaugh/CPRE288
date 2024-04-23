@@ -30,6 +30,7 @@
 //extern volatile char receive_buffer[]; // buffer for characters received from PuTTY
 //extern volatile int receive_index; // index to keep track of characters in buffer
 
+extern volatile char command_byte;
 extern volatile char command_byte_toggle; // byte value for special character used as a command
 extern volatile int command_flag_toggle;
 

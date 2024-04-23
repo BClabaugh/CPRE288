@@ -65,13 +65,21 @@ void object_data_send(full_scan_data_t *self);
 
 int smallest_object(full_scan_data_t *self);
 
-void controlled_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj);
+int closest_object(full_scan_data_t *self);
+
+int sml_objs_count(full_scan_data_t *self);
+
+void sml_objs_nums_arr(full_scan_data_t *self, int sml_objs, int arr[]);
+
+//void controlled_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj);
 
 //void ir_init_output(oi_t *sensor_data, cyBOT_Scan_t *scan_data);
 
-int auto_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj);
+//int auto_driving(full_scan_data_t *self, oi_t *sensor_data, int sml_obj);
 
 void turning_init(oi_t *sensor_data);
+
+void sound();
 
 
 #endif /* FUNCTIONS_H_ */
