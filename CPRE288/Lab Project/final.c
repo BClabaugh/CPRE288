@@ -52,7 +52,7 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
 
 
 
-    ////////////////////////////////////////////////////// SHANE CODE IDK IF IT WORKS
+    //SHANE CODE IDK IF IT WORKS, THIS IS FOR WHEN WE ARE DRIVING IN MANUAL, We want to know distance, angle, bump, and cliff
     double distance_travelled = 0;
     double angle_travelled = 0;
     oi_update(sensor_data);
@@ -74,26 +74,24 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
     }
 
 
-
-
     cliff_left = sensor_data -> cliffLeft;
     cliff_front_left = sensor_data -> cliffFrontLeft;
     cliffFrontRight = sensor_data -> cliffFrontRight;
     cliffRight = sensor_data -> cliffRight;
 
-    if(cliff_left == 1) {
+    if(cliff_left > 2650) {
       sendBytes("FUCK, cliff on da left")
     }
 
-    else if(cliff_front_left == 1) {
+    else if(cliff_front_left > 2650) {
       sendBytes("FUCK, cliff on da front left")
     }
 
-    else if(cliffFrontRight == 1) {
+    else if(cliffFrontRight > 2650) {
       sendBytes("FUCK, cliff on da front right")
     }
 
-    else if(cliffRight == 1) {
+    else if(cliffRight  > 2500) {
       sendBytes("FUCK, cliff on da right")
     }
     ////////////////////////////////////////////////////// SHANE CODE IDK IF IT WORKS
