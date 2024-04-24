@@ -41,6 +41,76 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
         command_flag_toggle = 0;
         autonomous(self, sensor_data);
     }
+
+
+
+
+
+
+
+
+
+
+
+    ////////////////////////////////////////////////////// SHANE CODE IDK IF IT WORKS
+    double distance_travelled = 0;
+    double angle_travelled = 0;
+    oi_update(sensor_data);
+    distance_travelled += sensor_data -> distance;
+    angle_travelled += sensor_data -> angle;
+    sendBytes("Distance traveled: %s",distance_travelled)
+    sendBytes("Angle traveled: %s",angle_travelled)
+
+
+    bump_left = sensor_data -> bumpLeft;
+    bump_right = sensor_data -> bumpRight;
+
+    if(bump_left == 1) {
+      sendBytes("FUCK, short obstacle on da left")
+    }
+
+    else if(bump_right == 1) {
+      sendBytes("FUCK, short obstacle on da right")
+    }
+
+
+
+
+    cliff_left = sensor_data -> cliffLeft;
+    cliff_front_left = sensor_data -> cliffFrontLeft;
+    cliffFrontRight = sensor_data -> cliffFrontRight;
+    cliffRight = sensor_data -> cliffRight;
+
+    if(cliff_left == 1) {
+      sendBytes("FUCK, cliff on da left")
+    }
+
+    else if(cliff_front_left == 1) {
+      sendBytes("FUCK, cliff on da front left")
+    }
+
+    else if(cliffFrontRight == 1) {
+      sendBytes("FUCK, cliff on da front right")
+    }
+
+    else if(cliffRight == 1) {
+      sendBytes("FUCK, cliff on da right")
+    }
+    ////////////////////////////////////////////////////// SHANE CODE IDK IF IT WORKS
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     command_byte = 'o';
     //ch = uart_receive();
   }
