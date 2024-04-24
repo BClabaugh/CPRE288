@@ -52,7 +52,7 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
 
 
 
-    //SHANE CODE IDK IF IT WORKS, THIS IS FOR WHEN WE ARE DRIVING IN MANUAL, We want to know distance, angle, bump, and cliff
+    //SHANE CODE IDK IF IT WORKS, THIS IS FOR WHEN WE ARE DRIVING IN MANUAL, We want to know distance, angle, bump, and cliff. I DOUBT ANGLE WILL WORK HOW I DID it
     double distance_travelled = 0;
     double angle_travelled = 0;
     oi_update(sensor_data);
