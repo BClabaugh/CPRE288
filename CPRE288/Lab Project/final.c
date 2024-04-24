@@ -52,25 +52,32 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
 
 
 
-    //SHANE CODE IDK IF IT WORKS, THIS IS FOR WHEN WE ARE DRIVING IN MANUAL, We want to know distance, angle, bump, and cliff. I DOUBT ANGLE WILL WORK HOW I DID it
+//SHANE CODE IDK IF IT WORKS, THIS IS FOR WHEN WE ARE DRIVING IN MANUAL, We want to know distance, angle, bump, and cliff. I DOUBT ANGLE WILL WORK HOW I DID it
     double distance_travelled = 0;
     double angle_travelled = 0;
+    int bump_left;
+    int bump_right;
+    int cliff_left = sensor_data -> cliffLeft;
+    int cliff_front_left = sensor_data -> cliffFrontLeft;
+    int cliffFrontRight = sensor_data -> cliffFrontRight;
+    int cliffRight = sensor_data -> cliffRight;
+
     oi_update(sensor_data);
     distance_travelled += sensor_data -> distance;
     angle_travelled += sensor_data -> angle;
-    sendBytes("Distance traveled: %s",distance_travelled)
-    sendBytes("Angle traveled: %s",angle_travelled)
+    sendBytes("Distance traveled: %s",distance_travelled);
+    sendBytes("Angle traveled: %s",angle_travelled);
 
 
     bump_left = sensor_data -> bumpLeft;
     bump_right = sensor_data -> bumpRight;
 
     if(bump_left == 1) {
-      sendBytes("FUCK, short obstacle on da left")
+        sendBytes("FUCK, short obstacle on da left", 0);
     }
 
     else if(bump_right == 1) {
-      sendBytes("FUCK, short obstacle on da right")
+      sendBytes("FUCK, short obstacle on da right", 0);
     }
 
 
@@ -80,19 +87,19 @@ void controlled_driving(full_scan_data_t *self, oi_t *sensor_data){
     cliffRight = sensor_data -> cliffRight;
 
     if(cliff_left > 2650) {
-      sendBytes("FUCK, cliff on da left")
+      sendBytes("FUCK, cliff on da left", 0);
     }
 
     else if(cliff_front_left > 2650) {
-      sendBytes("FUCK, cliff on da front left")
+      sendBytes("FUCK, cliff on da front left", 0);
     }
 
     else if(cliffFrontRight > 2650) {
-      sendBytes("FUCK, cliff on da front right")
+      sendBytes("FUCK, cliff on da front right", 0);
     }
 
     else if(cliffRight  > 2500) {
-      sendBytes("FUCK, cliff on da right")
+      sendBytes("FUCK, cliff on da right", 0);
     }
     ////////////////////////////////////////////////////// SHANE CODE IDK IF IT WORKS
 
