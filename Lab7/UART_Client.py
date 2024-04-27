@@ -17,7 +17,8 @@ import tkinter as tk  # Tkinter GUI library
 import threading
 import os  # import function for finding absolute path to this python script
 
-from Lab7.polarScan import polarScan
+# from Lab7.polarScan import polarScan
+from polarScan import polarScan
 
 
 ##### START Define Functions  #########
@@ -51,6 +52,9 @@ def main():
 
     right_command_Button = tk.Button(text="right", command=send_right)
     right_command_Button.pack()  # Pack the button into the window for display
+
+    sound_command_Button = tk.Button(text="sound", command=send_sound)
+    sound_command_Button.pack()  # Pack the button into the window for display
 
     # Create a Thread that will run a fuction assocated with a user defined "target" function.
     # In this case, the target function is the Client socket code
@@ -96,6 +100,11 @@ def send_right():
 def send_left():
     global gui_send_message
     gui_send_message = "a\n"
+
+def send_sound():
+    global gui_send_message
+    gui_send_message = "x\n"
+
 def socket_thread():
     # Define Globals
     global Last_command_Label  # GUI label for displaying the last command sent to the Cybot
@@ -132,6 +141,9 @@ def socket_thread():
 
     print("Sent to server: " + send_message)
 
+    file_object = open(full_path + filename,'w')
+    file_object.close()
+
     # Send messges to server until user sends "quit"
     while send_message != 'quit\n':
 
@@ -141,16 +153,21 @@ def socket_thread():
 
         # Check if a sensor scan command has been sent
         if send_message == "m\n":
+            
 
 
             print("Requested Sensor scan from Cybot:\n")
             rx_message = bytearray(1)  # Initialize a byte array
-            cybot.readline()
+            rx_message = cybot.readline()
             # Create or overwrite existing sensor scan data file
             file_object = open(full_path + filename,
                                'w')  # Open the file: file_object is just a variable for the file "handler" returned by open()
 
-            while rx_message.decode() != "END\n":  # Collect sensor data until "END" recieved
+            #message = rx_message.decode()
+            # print("Message: " + message + "\n")
+            # if(message == "Error"):
+            #     break
+            while ((rx_message.decode() != "END\n")):  # Collect sensor data until "END" recieved
                 rx_message = cybot.readline()  # Wait for sensor response, readline expects message to end with "\n"
                 file_object.write(rx_message.decode())  # Write a line of sensor data to the file
                 print(rx_message.decode())  # Convert message from bytes to String (i.e., decode), then print
@@ -161,6 +178,9 @@ def socket_thread():
             rx_message = cybot.readline()  # Wait for a message, readline expects message to end with "\n"
             print(
                 "Got a message from server: " + rx_message.decode() + "\n")  # Convert message from bytes to String (i.e., decode)
+            # rx_message = cybot.readline()  # Wait for a message, readline expects message to end with "\n"
+            # print(
+            #     "Action: " + rx_message.decode() + "\n")  # Convert message from bytes to String (i.e., decode)
 
         # Choose either: 1) Idle wait, or 2) Request a periodic status update from the Cybot
         # 1) Idle wait: for gui_send_message to be updated by the GUI
@@ -177,7 +197,7 @@ def socket_thread():
         #        send_message = gui_send_message  # GUI has requested a new command
 
         gui_send_message = "wait\n"  # Reset gui command message request to wait
-
+        #cybot.flush()
         cybot.write(send_message.encode())  # Convert String to bytes (i.e., encode), and send data to the server
 
     print("Client exiting, and closing file descriptor, and/or network socket\n")

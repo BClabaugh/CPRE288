@@ -44,6 +44,12 @@ def polarScan():
             distance.append(float(data[1]))
             ir_distance.append(float(data[2]))
 
+    for i in range(len(distance)):
+        if distance[i] < 0 and i == 0:
+            distance[i] = distance[i + 1]
+        if distance[i] < 0 and i > 0:
+            distance[i] = distance[i - 1]
+
     angle_degrees = np.array(angle_degrees)
     angle_radians = (np.pi/180) * angle_degrees
     edge = 0
