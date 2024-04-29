@@ -34,14 +34,21 @@ int main(void) {
   
   //---------------- Lab Project -----------------
 
-
+//	turn_left(sensor_data, 90);
+//	timer_waitMillis(3000);
+//	turn_right(sensor_data, 90);
 //	while(1)
 //	{
 //	    oi_update(sensor_data);
 //	    lcd_printf("%s%d\n%s%d\n%s%d\n%s%d", "L:", sensor_data->cliffLeftSignal, "LF:", sensor_data->cliffFrontLeftSignal, "RF:", sensor_data->cliffFrontRightSignal, "R:", sensor_data->cliffRightSignal);
 //	}
-
-
+//	servos_move(90);
+//	while(1)
+//	  {
+//	        int scan_IR_ave = adc_sample_averager();
+//	      lcd_printf("%d", scan_IR_ave);
+//	      timer_waitMillis(1000);
+//	  }
 
 	//sound();
   controlled_driving(full_scan_data, sensor_data);

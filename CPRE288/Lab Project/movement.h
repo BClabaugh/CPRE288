@@ -33,7 +33,7 @@ void square(oi_t *sensor_data);
 
 void avoidance(oi_t *sensor_data, bool direction);
 
-int auto_forward(oi_t *sensor_data, double distance_mm, int spd);
+int auto_forward(oi_t *sensor_data, double distance_mm, int spd, int spd2);
 
 
 #endif /* MOVEMENT_H_ */

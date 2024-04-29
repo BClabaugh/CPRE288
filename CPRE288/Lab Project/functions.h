@@ -61,11 +61,17 @@ void reset_objects(full_scan_data_t *self);
 
 void full_scan_data_send(full_scan_data_t *self);
 
+void scan_send_GUI(full_scan_data_t *full_scan_data, int deg);
+
 void object_data_send(full_scan_data_t *self);
 
 int smallest_object(full_scan_data_t *self);
 
 int closest_object(full_scan_data_t *self);
+
+int closest_2nd_object(full_scan_data_t *self, int close_obj);
+
+int objs_count(full_scan_data_t *self);
 
 int sml_objs_count(full_scan_data_t *self);
 

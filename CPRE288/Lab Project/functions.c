@@ -36,7 +36,7 @@ void sendBytesInt(char* message, double data){
   char final_mes[100];
 
   if (data != -10000) {
-    sprintf(final_mes, "%s %.0f", message, data);
+    sprintf(final_mes, "%s%.0f", message, data);
   } else {
     strcpy(final_mes, message);
   }
@@ -75,11 +75,10 @@ void full_scan_data_free(full_scan_data_t *self)
 
 // function to scan the CyBot surroundings
 void scan_path(full_scan_data_t *full_scan_data){
-  uart_sendChar('\r');
-  uart_sendChar('\n');
   servos_move(0);
   timer_waitMillis(700);
   int i;
+  sendBytes("Angle(Degrees) Distance(m)\n",-10000);
   for (i=0; i <= 180; i+=2)
   {
     servos_move(i);
@@ -88,11 +87,17 @@ void scan_path(full_scan_data_t *full_scan_data){
     float scan_ping_val = ping_getDistance();
 
     full_scan_update(full_scan_data, i, scan_IR_ave, scan_ping_val);
-    scan_send(full_scan_data, i);
+    //scan_send(full_scan_data, i);
+    scan_send_GUI(full_scan_data, i);
   }
-  
+  sendBytesInt("END\n", -10000);
+
   find_objects_pos(full_scan_data);
 }
+
+
+
+
 
 void scan_objs(full_scan_data_t *full_scan_data){
 //  int k;
@@ -113,10 +118,11 @@ void scan_objs(full_scan_data_t *full_scan_data){
 //  }
 
   find_objects_full(full_scan_data);
-  uart_sendChar('\r');
-  uart_sendChar('\n');
-  full_scan_data_send(full_scan_data);
-  object_data_send(full_scan_data);
+  //uart_sendChar('\r');
+  //uart_sendChar('\n');
+  //full_scan_data_send(full_scan_data);
+  //object_data_send(full_scan_data);
+
 
 }
 
@@ -124,7 +130,10 @@ void scan_objs(full_scan_data_t *full_scan_data){
 void full_scan_update(full_scan_data_t *full_scan_data, int i, int scan_IR_ave, float scan_ping_val){
   full_scan_data -> sound_dist_arr[i/2] = scan_ping_val;
   full_scan_data -> IR_raw_val_arr[i/2] = scan_IR_ave;
-  full_scan_data -> IR_val_arr[i/2]  = (420.160 * exp(-0.00244594 * (scan_IR_ave)) + 2.056);
+  //full_scan_data -> IR_val_arr[i/2]  = (420.160 * exp(-0.00244594 * (scan_IR_ave)) + 2.056);
+  full_scan_data -> IR_val_arr[i/2]  = (110.147 * exp(-0.00139176 * (scan_IR_ave)) + 3.189);
+
+
 
   timer_waitMillis(15); //open_interface.c when updating there data struct says to wait
 }
@@ -142,7 +151,7 @@ void find_objects_pos(full_scan_data_t *full_scan_data){
   for(i=0; i <= 90; i+=1)
   {
     //3 meter vision (30 cm currently)
-    if(full_scan_data -> IR_val_arr[i] > 50 || i==0 || i==1 || i==2){
+    if(full_scan_data -> IR_val_arr[i] > 65 || i==0 || i==1 || i==2){
       continue;
     }
     //object first detection
@@ -150,7 +159,7 @@ void find_objects_pos(full_scan_data_t *full_scan_data){
       int j;
       for(j=i+1; j<=90; j+=1){
         int h = j;
-        if((full_scan_data -> IR_val_arr[j] > 50 && h - i > 3) || j == 90){
+        if((full_scan_data -> IR_val_arr[j] > 65 && h - i > 1) || j == 90){
           //i is the first angle the object was detected
           //j-1 is the last angle the object was detected
 
@@ -241,6 +250,14 @@ void scan_send(full_scan_data_t *full_scan_data, int deg){
   uart_sendChar('\n');
 }
 
+//Blake computer
+void scan_send_GUI(full_scan_data_t *full_scan_data, int deg){
+  sendBytesInt("", deg);
+  sendBytes("\t\t\t\t", full_scan_data -> sound_dist_arr[deg/2]);
+  sendBytes("\t\t\t\t",  full_scan_data -> IR_val_arr[deg/2]);
+  sendBytes("\n",-10000);
+}
+
 // prints all values in our data struct to PuTTY
 void full_scan_data_send(full_scan_data_t *self){
   int i;
@@ -327,6 +344,45 @@ int closest_object(full_scan_data_t *self){
   servos_move(self -> obj_mid_angle[clos_obj]);
   //cyBOT_Scan(self -> obj_mid_angle[sml_obj], scan_data);
   return clos_obj;
+}
+
+// finds the closest object of detected objects
+int closest_2nd_object(full_scan_data_t *self, int close_obj){
+  int clos_obj_2 = -1;
+  int i;
+  for(i=0; i < 7; i += 1)
+  {
+      if(self -> obj_num[i] != close_obj)
+      {
+          clos_obj_2 = i;
+      }
+  }
+  for (i=0; i <= 7; i+=1)
+  {
+    if(self -> obj_num[i] != 0){
+      if((self -> obj_dist[i] < self -> obj_dist[clos_obj_2]) && self -> obj_num[i] != close_obj){
+
+          clos_obj_2 = i;
+      }
+    }
+  }
+  // pointing CyBot sensor at smallest object
+  servos_move(self -> obj_mid_angle[clos_obj_2]);
+  //cyBOT_Scan(self -> obj_mid_angle[sml_obj], scan_data);
+  return clos_obj_2;
+}
+
+// finds the number of object detected
+int objs_count(full_scan_data_t *self){
+  int objs = 0;
+  int i;
+  for (i=0; i <= 7; i+=1)
+  {
+    if(self -> obj_num[i] != 0){
+      objs += 1;
+    }
+  }
+  return objs;
 }
 
 // finds the amount of pillars from scan
@@ -439,12 +495,12 @@ void turning_init(oi_t *sensor_data){
 
 void sound()
 {
-    //oi_loadSong(int song_index, int num_notes, unsigned char *notes, unsigned char *duration);
     unsigned char notes[] = {88, 88, 88, 88, 88, 88, 88, 76, 87, 87, 87, 75, 97, 97, 97, 73, 93, 93, 92, 88};
     unsigned char duration[] = {16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16, 16};
     oi_loadSong(0, 20, notes, duration);
     oi_play_song(0);
 }
+
 
 
 
